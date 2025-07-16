@@ -11,53 +11,42 @@ import org.knowm.xchange.service.BaseExchangeService;
 import org.knowm.xchange.service.BaseService;
 import org.knowm.xchange.tradeogre.TradeOgreAuthenticated;
 import org.knowm.xchange.tradeogre.TradeOgreExchange;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import si.mazi.rescu.ClientConfigUtil;
 import si.mazi.rescu.serialization.jackson.DefaultJacksonObjectMapperFactory;
 
 public class TradeOgreBaseService extends BaseExchangeService<TradeOgreExchange>
     implements BaseService {
 
+  protected final Logger LOG = LoggerFactory.getLogger(getClass());
+
   protected final TradeOgreAuthenticated tradeOgre;
   protected final String base64UserPwd;
+  protected final String apiKey;
+  protected final String secretKey;
 
   protected TradeOgreBaseService(TradeOgreExchange exchange) {
 
     super(exchange);
 
-    String apiKey = exchange.getExchangeSpecification().getApiKey();
-    String secretKey = exchange.getExchangeSpecification().getSecretKey();
+    apiKey = exchange.getExchangeSpecification().getApiKey();
+    secretKey = exchange.getExchangeSpecification().getSecretKey();
 
     base64UserPwd = calculateBase64UserPwd(exchange);
-
-    ClientConfigCustomizer clientConfigCustomizer =
-        config -> {
-          config = ClientConfigUtil.addBasicAuthCredentials(config, apiKey, secretKey);
-          config.setJacksonObjectMapperFactory(
-              new DefaultJacksonObjectMapperFactory() {
-                @Override
-                public void configureObjectMapper(ObjectMapper objectMapper) {
-                  super.configureObjectMapper(objectMapper);
-                  objectMapper.configure(
-                      DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
-                }
-              });
-        };
     tradeOgre =
         ExchangeRestProxyBuilder.forInterface(
                 TradeOgreAuthenticated.class, exchange.getExchangeSpecification())
-            .clientConfigCustomizer(clientConfigCustomizer)
             .build();
   }
 
   private String calculateBase64UserPwd(TradeOgreExchange exchange) {
-    String apiKey = exchange.getExchangeSpecification().getApiKey();
-    String secretKey = exchange.getExchangeSpecification().getSecretKey();
-    
     if (apiKey == null || secretKey == null) {
       throw new IllegalArgumentException("API key and secret key must not be null");
     }
-    
-    String userPwd = apiKey + ":" + secretKey;
-    return "Basic " + Base64.getEncoder().encodeToString(userPwd.getBytes(StandardCharsets.ISO_8859_1));
+    String userPwd = this.apiKey + ":" + this.secretKey;
+    String encodedString = Base64.getEncoder().encodeToString(userPwd.getBytes());
+    return "Basic " + encodedString;
   }
 }

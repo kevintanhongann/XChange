@@ -11,6 +11,7 @@ import org.knowm.xchange.tradeogre.dto.account.TradeOgreBalances;
 import org.knowm.xchange.tradeogre.dto.trade.TradeOgreOrder;
 import org.knowm.xchange.tradeogre.dto.trade.TradeOgreTrade;
 import org.knowm.xchange.tradeogre.dto.trade.TradeOgreTradeResponse;
+import jakarta.ws.rs.core.MediaType;
 
 @Path("")
 public interface TradeOgreAuthenticated extends TradeOgre {
@@ -21,12 +22,15 @@ public interface TradeOgreAuthenticated extends TradeOgre {
       throws IOException;
 
   @POST
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("account/balance")
   TradeOgreBalance getBalance(
-      @HeaderParam("Authorization") String base64UserPwd, @FormParam("currency") String currency)
+    @HeaderParam("Authorization") String base64UserPwd,
+      @FormParam("currency") String currency)
       throws IOException;
 
   @POST
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("order/buy")
   TradeOgreTradeResponse buy(
       @HeaderParam("Authorization") String base64UserPwd,
@@ -36,6 +40,7 @@ public interface TradeOgreAuthenticated extends TradeOgre {
       throws IOException;
 
   @POST
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("order/sell")
   TradeOgreTradeResponse sell(
       @HeaderParam("Authorization") String base64UserPwd,
@@ -45,12 +50,15 @@ public interface TradeOgreAuthenticated extends TradeOgre {
       throws IOException;
 
   @POST
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("order/cancel")
   TradeOgreTradeResponse cancel(
-      @HeaderParam("Authorization") String base64UserPwd, @FormParam("uuid") String uuid)
+      @HeaderParam("Authorization") String base64UserPwd,
+      @FormParam("uuid") String uuid)
       throws IOException;
 
   @POST
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("account/orders")
   List<TradeOgreOrder> getOrders(
       @HeaderParam("Authorization") String base64UserPwd, @FormParam("market") String market)
