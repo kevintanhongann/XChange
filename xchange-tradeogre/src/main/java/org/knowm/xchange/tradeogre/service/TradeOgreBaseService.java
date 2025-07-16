@@ -2,7 +2,6 @@ package org.knowm.xchange.tradeogre.service;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import org.knowm.xchange.client.ClientConfigCustomizer;
