@@ -56,6 +56,10 @@ class BitgetFuturesMarketDataServiceIntegration extends BitgetFuturesIntegration
         .allSatisfy(
             ticker -> {
               assertThat(ticker.getInstrument()).isNotNull();
+              assertThat(ticker.getInstrument()).isInstanceOf(FuturesContract.class);
+              FuturesContract futuresContract = (FuturesContract) ticker.getInstrument();
+              assertThat(futuresContract.getCurrencyPair()).isNotNull();
+
               assertThat(ticker.getLast()).isNotNull();
 
               if (ObjectUtils.allNotNull(ticker.getBid(), ticker.getAsk())

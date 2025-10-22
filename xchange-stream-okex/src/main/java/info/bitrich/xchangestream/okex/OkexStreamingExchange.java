@@ -3,7 +3,6 @@ package info.bitrich.xchangestream.okex;
 import info.bitrich.xchangestream.core.ProductSubscription;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import info.bitrich.xchangestream.core.StreamingMarketDataService;
-import info.bitrich.xchangestream.core.StreamingTradeService;
 import info.bitrich.xchangestream.service.netty.ConnectionStateModel;
 import info.bitrich.xchangestream.service.netty.ConnectionStateModel.State;
 import info.bitrich.xchangestream.service.netty.WebSocketClientHandler;
@@ -45,12 +44,13 @@ public class OkexStreamingExchange extends OkexExchange implements StreamingExch
     this.streamingService = new OkexStreamingService(getPublicApiUrl(), this.exchangeSpecification);
     if (isApiKeyValid()) {
       this.privateStreamingService =
-          new OkexPrivateStreamingService(getPrivateApiUrl(), this.exchangeSpecification);
+          new OkexPrivateStreamingService(getPrivateApiUrl(), this.exchangeSpecification, this);
     }
     this.streamingMarketDataService =
         new OkexStreamingMarketDataService(streamingService, exchangeMetaData);
     this.streamingTradeService =
-        new OkexStreamingTradeService(privateStreamingService, exchangeMetaData);
+        new OkexStreamingTradeService(
+            privateStreamingService, exchangeMetaData, getResilienceRegistries());
     List<Completable> completableList = new ArrayList<>();
     completableList.add(streamingService.connect());
     if (isApiKeyValid()) {
@@ -128,7 +128,7 @@ public class OkexStreamingExchange extends OkexExchange implements StreamingExch
   }
 
   @Override
-  public StreamingTradeService getStreamingTradeService() {
+  public OkexStreamingTradeService getStreamingTradeService() {
     return streamingTradeService;
   }
 

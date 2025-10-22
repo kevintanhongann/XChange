@@ -162,10 +162,10 @@ public final class BitstampAdapters {
         DateUtils.fromMillisUtc(
             tx.getDate()
                 * timeScale); // polled order books provide a timestamp in seconds, stream in ms
-    return new Trade.Builder()
+    return Trade.builder()
         .type(orderType)
         .originalAmount(tx.getAmount())
-        .currencyPair(currencyPair)
+        .instrument(currencyPair)
         .price(tx.getPrice())
         .timestamp(date)
         .id(tradeId)
@@ -239,7 +239,7 @@ public final class BitstampAdapters {
           UserTrade.builder()
               .type(orderType)
               .originalAmount(t.getBaseAmount().abs())
-              .currencyPair(pair)
+              .instrument(pair)
               .price(t.getPrice().abs())
               .timestamp(t.getDatetime())
               .id(Long.toString(tradeId))
@@ -297,18 +297,15 @@ public final class BitstampAdapters {
         }
 
         FundingRecord record =
-            new FundingRecord(
-                null,
-                trans.getDatetime(),
-                Currency.getInstance(amount.getKey()),
-                amount.getValue().abs(),
-                String.valueOf(trans.getId()),
-                null,
-                type,
-                FundingRecord.Status.COMPLETE,
-                null,
-                getFeeFromString(trans.getFee()),
-                null);
+            FundingRecord.builder()
+                .date(trans.getDatetime())
+                .currency(Currency.getInstance(amount.getKey()))
+                .amount(amount.getValue().abs())
+                .internalId(String.valueOf(trans.getId()))
+                .type(type)
+                .status(FundingRecord.Status.COMPLETE)
+                .fee(getFeeFromString(trans.getFee()))
+                .build();
         fundingRecords.add(record);
       }
     }
@@ -459,7 +456,7 @@ public final class BitstampAdapters {
     String[] minOrderParts = pairInfo.getMinimumOrder().split(" ");
     BigDecimal minOrder = new BigDecimal(minOrderParts[0]);
 
-    return new InstrumentMetaData.Builder()
+    return InstrumentMetaData.builder()
         .counterMinimumAmount(minOrder)
         .priceScale(pairInfo.getCounterDecimals())
         .volumeScale(pairInfo.getBaseDecimals())

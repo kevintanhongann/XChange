@@ -65,11 +65,15 @@ class BinanceUserDataChannel implements AutoCloseable {
   }
 
   private void keepAlive() {
-    if (listenKey == null) return;
+    if (listenKey == null) {
+      return;
+    }
     try {
       LOG.debug("Keeping user data channel alive");
       onApiCall.run();
-      binance.keepAliveUserDataStream(apiKey, listenKey);
+      if (isFuturesEnabled) {
+        binance.keepAliveFutureUserDataStream(apiKey, listenKey);
+      } else binance.keepAliveUserDataStream(apiKey, listenKey);
       LOG.debug("User data channel keepalive sent successfully");
     } catch (Exception e) {
       LOG.error("User data channel keepalive failed.", e);
@@ -94,9 +98,11 @@ class BinanceUserDataChannel implements AutoCloseable {
     try {
       LOG.debug("Opening new user data channel");
       onApiCall.run();
-      if (isFuturesEnabled)
+      if (isFuturesEnabled) {
         this.listenKey = binance.startFutureUserDataStream(apiKey).getListenKey();
-      else this.listenKey = binance.startUserDataStream(apiKey).getListenKey();
+      } else {
+        this.listenKey = binance.startUserDataStream(apiKey).getListenKey();
+      }
       LOG.debug("Opened new user data channel");
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -108,7 +114,9 @@ class BinanceUserDataChannel implements AutoCloseable {
    * @throws NoActiveChannelException If no listen key is currently available.
    */
   String getListenKey() throws NoActiveChannelException {
-    if (listenKey == null) throw new NoActiveChannelException();
+    if (listenKey == null) {
+      throw new NoActiveChannelException();
+    }
     return listenKey;
   }
 

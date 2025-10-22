@@ -125,9 +125,8 @@ public class BinanceExchange extends BaseExchange implements Exchange {
           break;
         default:
           Map<String, AssetDetail> assetDetailMap = null;
-          if (!usingSandbox() && isAuthenticated() && !isFuturesEnabled()) {
-            assetDetailMap =
-                accountService.getAssetDetails(); // not available in sndbox and Futures
+          if (!usingSandbox() && isAuthenticated()) {
+            assetDetailMap = accountService.getAssetDetails(); // not available in sndbox
           }
           exchangeInfo = marketDataServiceRaw.getExchangeInfo();
           exchangeMetaData = BinanceAdapters.adaptExchangeMetaData(exchangeInfo, assetDetailMap);
@@ -157,7 +156,7 @@ public class BinanceExchange extends BaseExchange implements Exchange {
   }
 
   /** Adjust host parameters depending on exchange specific parameters */
-  private static void concludeHostParams(ExchangeSpecification exchangeSpecification) {
+  protected void concludeHostParams(ExchangeSpecification exchangeSpecification) {
     if (exchangeSpecification.getExchangeSpecificParametersItem(EXCHANGE_TYPE) != null) {
       switch ((ExchangeType)
           exchangeSpecification.getExchangeSpecificParametersItem(EXCHANGE_TYPE)) {
@@ -186,6 +185,9 @@ public class BinanceExchange extends BaseExchange implements Exchange {
             }
             break;
           }
+        case PORTFOLIO_MARGIN:
+          exchangeSpecification.setSslUri(PORTFOLIO_MARGIN_URL);
+          break;
       }
     }
   }
